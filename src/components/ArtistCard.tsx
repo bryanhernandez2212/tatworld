@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 interface ArtistCardProps {
   slug: string;
@@ -11,8 +11,9 @@ interface ArtistCardProps {
 }
 
 const ArtistCard = ({ slug, name, image, city, specialty, rating, online }: ArtistCardProps) => {
+  const navigate = useNavigate();
   return (
-    <Link to={`/tatuador/${slug}`} className="group relative rounded-xl overflow-hidden cursor-pointer block">
+    <div onClick={() => navigate(`/tatuador/${slug}`)} className="group relative rounded-xl overflow-hidden cursor-pointer block">
       <div className="aspect-[3/4] overflow-hidden">
         <img src={image} alt={name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
       </div>
