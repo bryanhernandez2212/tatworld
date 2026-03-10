@@ -28,7 +28,7 @@ const ArtistCard = ({ slug, name, image, city, specialty, rating, online }: Arti
           <span className="text-xs text-muted-foreground">⭐ {rating}</span>
         </div>
       </div>
-    </Link>
+    </div>
   );
 };
 
