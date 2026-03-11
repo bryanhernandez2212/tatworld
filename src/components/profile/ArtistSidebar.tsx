@@ -87,7 +87,7 @@ const ArtistSidebar = ({ artist }: Props) => {
         Agendar Cita
       </button>
 
-      <BookingFlow artist={artist} open={bookingOpen} onOpenChange={setBookingOpen} />
+      <BookingRequestDialog artist={artist} open={bookingOpen} onOpenChange={setBookingOpen} />
     </div>
   );
 };
