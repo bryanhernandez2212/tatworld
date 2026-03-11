@@ -1,11 +1,14 @@
+import { useState } from "react";
 import type { Artist } from "@/data/artists";
 import { MapPin, DollarSign, Award, Building2, Users, CheckCircle, XCircle } from "lucide-react";
+import BookingFlow from "@/components/booking/BookingFlow";
 
 interface Props {
   artist: Artist;
 }
 
 const ArtistSidebar = ({ artist }: Props) => {
+  const [bookingOpen, setBookingOpen] = useState(false);
   return (
     <div className="space-y-6 lg:sticky lg:top-24">
       {/* Rango de Costos */}
@@ -78,9 +81,14 @@ const ArtistSidebar = ({ artist }: Props) => {
       )}
 
       {/* CTA */}
-      <button className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 transition-opacity">
+      <button
+        onClick={() => setBookingOpen(true)}
+        className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 transition-opacity"
+      >
         Agendar Cita
       </button>
+
+      <BookingFlow artist={artist} open={bookingOpen} onOpenChange={setBookingOpen} />
     </div>
   );
 };
