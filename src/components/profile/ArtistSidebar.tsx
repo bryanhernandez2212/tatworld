@@ -1,8 +1,7 @@
 import { useState } from "react";
 import type { Artist } from "@/data/artists";
 import { MapPin, DollarSign, Award, Building2, Users, CheckCircle, XCircle } from "lucide-react";
-import BookingFlow from "@/components/booking/BookingFlow";
-
+import BookingRequestDialog from "@/components/booking/BookingRequestDialog";
 interface Props {
   artist: Artist;
 }
