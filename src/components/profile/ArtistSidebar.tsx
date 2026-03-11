@@ -81,9 +81,14 @@ const ArtistSidebar = ({ artist }: Props) => {
       )}
 
       {/* CTA */}
-      <button className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 transition-opacity">
+      <button
+        onClick={() => setBookingOpen(true)}
+        className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 transition-opacity"
+      >
         Agendar Cita
       </button>
+
+      <BookingFlow artist={artist} open={bookingOpen} onOpenChange={setBookingOpen} />
     </div>
   );
 };
