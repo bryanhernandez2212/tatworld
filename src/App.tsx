@@ -26,6 +26,8 @@ const App = () => (
           <Route path="/mis-citas" element={<MisCitas />} />
           <Route path="/proveedores" element={<Proveedores />} />
           <Route path="/proveedor/:slug" element={<SupplierProfile />} />
+          <Route path="/convenciones" element={<Convenciones />} />
+          <Route path="/convencion/:slug" element={<ConventionDetail />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
