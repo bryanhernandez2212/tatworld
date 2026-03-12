@@ -8,6 +8,8 @@ import ArtistProfile from "./pages/ArtistProfile.tsx";
 import MisCitas from "./pages/MisCitas.tsx";
 import Proveedores from "./pages/Proveedores.tsx";
 import SupplierProfile from "./pages/SupplierProfile.tsx";
+import Convenciones from "./pages/Convenciones.tsx";
+import ConventionDetail from "./pages/ConventionDetail.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -24,6 +26,8 @@ const App = () => (
           <Route path="/mis-citas" element={<MisCitas />} />
           <Route path="/proveedores" element={<Proveedores />} />
           <Route path="/proveedor/:slug" element={<SupplierProfile />} />
+          <Route path="/convenciones" element={<Convenciones />} />
+          <Route path="/convencion/:slug" element={<ConventionDetail />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
