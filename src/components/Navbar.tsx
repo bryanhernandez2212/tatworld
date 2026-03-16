@@ -26,13 +26,15 @@ const Navbar = () => {
       </div>
 
       <div className="flex items-center gap-4">
-        <Link
-          to="/mis-citas"
-          className="flex items-center gap-1.5 text-sm text-foreground hover:text-primary transition-colors"
-        >
-          <CalendarDays className="w-4 h-4" />
-          <span className="hidden sm:inline">Mis Citas</span>
-        </Link>
+        {user && (
+          <Link
+            to="/mis-citas"
+            className="flex items-center gap-1.5 text-sm text-foreground hover:text-primary transition-colors"
+          >
+            <CalendarDays className="w-4 h-4" />
+            <span className="hidden sm:inline">Mis Citas</span>
+          </Link>
+        )}
 
         {user ? (
           <div className="flex items-center gap-3">
