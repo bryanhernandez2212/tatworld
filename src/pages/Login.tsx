@@ -15,21 +15,17 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { quickLogin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const result = await login(email, password);
+    quickLogin();
     setLoading(false);
-    if (result.success) {
-      toast({ title: "¡Bienvenido de vuelta!", description: "Has iniciado sesión correctamente." });
-      navigate("/");
-    } else {
-      toast({ title: "Error", description: result.error, variant: "destructive" });
-    }
+    toast({ title: "¡Bienvenido!", description: "Has iniciado sesión correctamente." });
+    navigate("/");
   };
 
   return (
