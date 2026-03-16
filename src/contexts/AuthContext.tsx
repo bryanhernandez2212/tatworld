@@ -57,6 +57,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { success: true };
   };
 
+  const quickLogin = () => {
+    const mockProfile: UserProfile = {
+      id: "mock-user-001",
+      email: "usuario@tattsnearby.com",
+      name: "Usuario Demo",
+      city: "Ciudad de México",
+      createdAt: new Date().toISOString(),
+    };
+    setUser(mockProfile);
+    localStorage.setItem(SESSION_KEY, mockProfile.id);
+    const users = getStoredUsers();
+    if (!users.find((u) => u.profile.id === mockProfile.id)) {
+      users.push({ profile: mockProfile, password: "demo" });
+      localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    }
+  };
+
   const register = async (data: { email: string; password: string; name: string; city?: string }) => {
     const users = getStoredUsers();
     if (users.find((u) => u.profile.email === data.email)) {
