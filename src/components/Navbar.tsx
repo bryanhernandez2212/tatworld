@@ -54,9 +54,12 @@ const Navbar = () => {
           </div>
         ) : (
           <>
-            <Link to="/login" className="text-sm text-foreground hover:text-primary transition-colors">
+            <button
+              onClick={quickLogin}
+              className="text-sm text-foreground hover:text-primary transition-colors"
+            >
               Iniciar Sesión
-            </Link>
+            </button>
             <Button asChild size="sm">
               <Link to="/registro">Registrarse</Link>
             </Button>
