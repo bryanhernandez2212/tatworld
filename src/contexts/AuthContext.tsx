@@ -15,6 +15,7 @@ interface AuthContextType {
   user: UserProfile | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  quickLogin: () => void;
   register: (data: { email: string; password: string; name: string; city?: string }) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   updateProfile: (data: Partial<UserProfile>) => void;
@@ -56,6 +57,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { success: true };
   };
 
+  const quickLogin = () => {
+    const mockProfile: UserProfile = {
+      id: "mock-user-001",
+      email: "usuario@tattsnearby.com",
+      name: "Usuario Demo",
+      city: "Ciudad de México",
+      createdAt: new Date().toISOString(),
+    };
+    setUser(mockProfile);
+    localStorage.setItem(SESSION_KEY, mockProfile.id);
+    const users = getStoredUsers();
+    if (!users.find((u) => u.profile.id === mockProfile.id)) {
+      users.push({ profile: mockProfile, password: "demo" });
+      localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    }
+  };
+
   const register = async (data: { email: string; password: string; name: string; city?: string }) => {
     const users = getStoredUsers();
     if (users.find((u) => u.profile.email === data.email)) {
@@ -93,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user, isLoading, login, quickLogin, register, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );
