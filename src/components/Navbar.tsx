@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { CalendarDays, LogOut, User } from "lucide-react";
+import { CalendarDays, LogOut, User, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -7,6 +7,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -18,6 +19,8 @@ const Navbar = () => {
     logout();
     navigate("/");
   };
+
+  const isArtist = user?.role === "artist";
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-background/80 backdrop-blur-md border-b border-border">
@@ -33,13 +36,23 @@ const Navbar = () => {
       </div>
 
       <div className="flex items-center gap-4">
-        {user && (
+        {user && !isArtist && (
           <Link
             to="/mis-citas"
             className="flex items-center gap-1.5 text-sm text-foreground hover:text-primary transition-colors"
           >
             <CalendarDays className="w-4 h-4" />
             <span className="hidden sm:inline">Mis Citas</span>
+          </Link>
+        )}
+
+        {user && isArtist && (
+          <Link
+            to="/dashboard"
+            className="flex items-center gap-1.5 text-sm text-foreground hover:text-primary transition-colors"
+          >
+            <LayoutDashboard className="w-4 h-4" />
+            <span className="hidden sm:inline">Mi Panel</span>
           </Link>
         )}
 
@@ -54,7 +67,18 @@ const Navbar = () => {
                 </Avatar>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuContent align="end" className="w-44">
+              <div className="px-2 py-1.5">
+                <p className="text-sm font-medium text-foreground">{user.name}</p>
+                <p className="text-xs text-muted-foreground">{isArtist ? "Tatuador" : "Cliente"}</p>
+              </div>
+              <DropdownMenuSeparator />
+              {isArtist && (
+                <DropdownMenuItem onClick={() => navigate("/dashboard")} className="cursor-pointer">
+                  <LayoutDashboard className="w-4 h-4 mr-2" />
+                  Mi Panel
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                 <LogOut className="w-4 h-4 mr-2" />
                 Cerrar Sesión
