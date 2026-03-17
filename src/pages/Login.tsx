@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, LogIn } from "lucide-react";
+import { Eye, EyeOff, LogIn, User, Palette } from "lucide-react";
+import { UserRole } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 
 const Login = () => {
@@ -14,6 +15,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<UserRole>("client");
   const { quickLogin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -21,10 +23,15 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    quickLogin();
+    quickLogin(selectedRole);
     setLoading(false);
-    toast({ title: "¡Bienvenido!", description: "Has iniciado sesión correctamente." });
-    navigate("/");
+    toast({
+      title: "¡Bienvenido!",
+      description: selectedRole === "artist"
+        ? "Has iniciado sesión como tatuador."
+        : "Has iniciado sesión correctamente.",
+    });
+    navigate(selectedRole === "artist" ? "/dashboard" : "/");
   };
 
   return (
@@ -37,10 +44,43 @@ const Login = () => {
               <LogIn className="h-6 w-6 text-primary" />
             </div>
             <CardTitle className="text-2xl text-foreground">Iniciar Sesión</CardTitle>
-            <CardDescription>Ingresa tus credenciales para acceder a tu cuenta</CardDescription>
+            <CardDescription>Selecciona tu tipo de cuenta e ingresa tus credenciales</CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-5">
+              {/* Role selector */}
+              <div className="space-y-2">
+                <Label>Tipo de cuenta</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedRole("client")}
+                    className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
+                      selectedRole === "client"
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-secondary/30 text-muted-foreground hover:border-muted-foreground"
+                    }`}
+                  >
+                    <User className="h-6 w-6" />
+                    <span className="text-sm font-medium">Cliente</span>
+                    <span className="text-xs text-center opacity-70">Busco tatuarme</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedRole("artist")}
+                    className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
+                      selectedRole === "artist"
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-secondary/30 text-muted-foreground hover:border-muted-foreground"
+                    }`}
+                  >
+                    <Palette className="h-6 w-6" />
+                    <span className="text-sm font-medium">Tatuador</span>
+                    <span className="text-xs text-center opacity-70">Soy artista</span>
+                  </button>
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="email">Correo electrónico</Label>
                 <Input

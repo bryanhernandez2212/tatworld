@@ -1,21 +1,30 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
+export type UserRole = "client" | "artist";
+
 export interface UserProfile {
   id: string;
   email: string;
   name: string;
+  role: UserRole;
   avatar?: string;
   bio?: string;
   phone?: string;
   city?: string;
   createdAt: string;
+  // Artist-specific fields
+  styles?: string[];
+  priceRange?: string;
+  instagram?: string;
+  gallery?: string[];
+  flashDesigns?: string[];
 }
 
 interface AuthContextType {
   user: UserProfile | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  quickLogin: () => void;
+  quickLogin: (role?: UserRole) => void;
   register: (data: { email: string; password: string; name: string; city?: string }) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   updateProfile: (data: Partial<UserProfile>) => void;
@@ -57,19 +66,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { success: true };
   };
 
-  const quickLogin = () => {
+  const quickLogin = (role: UserRole = "client") => {
+    const isArtist = role === "artist";
     const mockProfile: UserProfile = {
-      id: "mock-user-001",
-      email: "usuario@tattsnearby.com",
-      name: "Usuario Demo",
+      id: isArtist ? "mock-artist-001" : "mock-user-001",
+      email: isArtist ? "artista@tattsnearby.com" : "usuario@tattsnearby.com",
+      name: isArtist ? "Artista Demo" : "Usuario Demo",
+      role,
       city: "Ciudad de México",
       createdAt: new Date().toISOString(),
+      ...(isArtist && {
+        styles: ["Realismo", "Blackwork", "Neotradicional"],
+        priceRange: "$1,500 - $5,000 MXN",
+        bio: "Tatuador profesional con 5 años de experiencia",
+        gallery: [],
+        flashDesigns: [],
+      }),
     };
     setUser(mockProfile);
     localStorage.setItem(SESSION_KEY, mockProfile.id);
     const users = getStoredUsers();
     if (!users.find((u) => u.profile.id === mockProfile.id)) {
       users.push({ profile: mockProfile, password: "demo" });
+      localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    } else {
+      const idx = users.findIndex((u) => u.profile.id === mockProfile.id);
+      users[idx].profile = mockProfile;
       localStorage.setItem(USERS_KEY, JSON.stringify(users));
     }
   };
@@ -83,6 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       id: crypto.randomUUID(),
       email: data.email,
       name: data.name,
+      role: "client",
       city: data.city,
       createdAt: new Date().toISOString(),
     };
