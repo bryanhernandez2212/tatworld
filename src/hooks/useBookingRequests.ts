@@ -58,6 +58,31 @@ export function useBookingRequests() {
     saveRequests(requests);
   }, [requests]);
 
+  // Sync across hook instances via storage events and polling
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY) {
+        setRequests(loadRequests());
+      }
+    };
+    window.addEventListener("storage", onStorage);
+
+    // Poll every 2s to catch same-tab updates from other hook instances
+    const interval = setInterval(() => {
+      const stored = loadRequests();
+      setRequests((prev) => {
+        const prevJson = JSON.stringify(prev);
+        const storedJson = JSON.stringify(stored);
+        return prevJson !== storedJson ? stored : prev;
+      });
+    }, 2000);
+
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      clearInterval(interval);
+    };
+  }, []);
+
   const addRequest = useCallback((req: Omit<BookingRequest, "id" | "createdAt" | "status">) => {
     const newReq: BookingRequest = {
       ...req,
@@ -67,43 +92,46 @@ export function useBookingRequests() {
     };
     setRequests((prev) => [newReq, ...prev]);
 
-    // Simulate quote arriving after 5 seconds
+    // Simulate quote arriving after 5 seconds (writes directly to localStorage)
     setTimeout(() => {
-      setRequests((prev) =>
-        prev.map((r) => {
-          if (r.id !== newReq.id || r.status !== "pending") return r;
-          const area = r.sizeWidth * r.sizeHeight;
-          const basePrice = 2000;
-          const pricePerCm2 = 20;
-          const quote = Math.round(basePrice + area * pricePerCm2);
-          return {
-            ...r,
-            status: "quoted" as BookingStatus,
-            quoteAmount: quote,
-            depositAmount: Math.round(quote * 0.3),
-            estimatedHours: Math.max(1, Math.round(area / 30)),
-            quoteNotes: `Tatuaje estilo ${r.style}, ${r.sizeWidth}×${r.sizeHeight}cm. Incluye diseño personalizado.`,
-          };
-        })
-      );
+      const current = loadRequests();
+      const updated = current.map((r) => {
+        if (r.id !== newReq.id || r.status !== "pending") return r;
+        const area = r.sizeWidth * r.sizeHeight;
+        const basePrice = 2000;
+        const pricePerCm2 = 20;
+        const quote = Math.round(basePrice + area * pricePerCm2);
+        return {
+          ...r,
+          status: "quoted" as BookingStatus,
+          quoteAmount: quote,
+          depositAmount: Math.round(quote * 0.3),
+          estimatedHours: Math.max(1, Math.round(area / 30)),
+          quoteNotes: `Tatuaje estilo ${r.style}, ${r.sizeWidth}×${r.sizeHeight}cm. Incluye diseño personalizado.`,
+        };
+      });
+      saveRequests(updated);
     }, 5000);
 
     return newReq.id;
   }, []);
 
   const updateRequest = useCallback((id: string, updates: Partial<BookingRequest>) => {
-    setRequests((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, ...updates } : r))
-    );
+    setRequests((prev) => {
+      const updated = prev.map((r) => (r.id === id ? { ...r, ...updates } : r));
+      saveRequests(updated);
+      return updated;
+    });
   }, []);
 
   const cancelRequest = useCallback((id: string) => {
-    setRequests((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, status: "cancelled" as BookingStatus } : r))
-    );
+    setRequests((prev) => {
+      const updated = prev.map((r) => (r.id === id ? { ...r, status: "cancelled" as BookingStatus } : r));
+      saveRequests(updated);
+      return updated;
+    });
   }, []);
 
-  // Force refresh from localStorage (for cross-component sync)
   const refresh = useCallback(() => {
     setRequests(loadRequests());
   }, []);
