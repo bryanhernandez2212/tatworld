@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { useBookingRequests, type BookingRequest, type BookingStatus } from "@/hooks/useBookingRequests";
-import { Clock, CheckCircle, XCircle, DollarSign, CalendarDays, FileText, AlertCircle, ArrowLeft } from "lucide-react";
+import { Clock, CheckCircle, XCircle, DollarSign, CalendarDays, FileText, AlertCircle, ArrowLeft, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -16,6 +16,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import BookingContinueFlow from "@/components/booking/BookingContinueFlow";
+import BookingDetailDialog from "@/components/booking/BookingDetailDialog";
 
 const STATUS_CONFIG: Record<BookingStatus, { label: string; icon: typeof Clock; color: string }> = {
   pending: { label: "Esperando cotización", icon: Clock, color: "bg-yellow-500/10 text-yellow-500" },
@@ -32,10 +33,10 @@ const MisCitas = () => {
   const { requests, updateRequest, cancelRequest, refresh } = useBookingRequests();
   const [cancelId, setCancelId] = useState<string | null>(null);
   const [continueRequest, setContinueRequest] = useState<BookingRequest | null>(null);
+  const [detailRequest, setDetailRequest] = useState<BookingRequest | null>(null);
 
   const handleAcceptQuote = (req: BookingRequest) => {
     updateRequest(req.id, { status: "accepted" });
-    // Open the continuation flow (payment → schedule → calendar → confirmation)
     setContinueRequest({ ...req, status: "accepted" });
   };
 
@@ -90,7 +91,8 @@ const MisCitas = () => {
               return (
                 <div
                   key={req.id}
-                  className="rounded-xl border border-border bg-secondary/30 p-5 space-y-4"
+                  className="rounded-xl border border-border bg-secondary/30 p-5 space-y-4 cursor-pointer hover:border-primary/30 transition-colors"
+                  onClick={() => setDetailRequest(req)}
                 >
                   {/* Header */}
                   <div className="flex items-start gap-4">
@@ -101,10 +103,7 @@ const MisCitas = () => {
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2 flex-wrap">
-                        <h3
-                          className="font-bold text-foreground cursor-pointer hover:text-primary transition-colors"
-                          onClick={() => navigate(`/tatuador/${req.artistSlug}`)}
-                        >
+                        <h3 className="font-bold text-foreground">
                           {req.artistName}
                         </h3>
                         <Badge variant="secondary" className={config.color}>
@@ -114,9 +113,7 @@ const MisCitas = () => {
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5">
                         {new Date(req.createdAt).toLocaleDateString("es-MX", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
+                          day: "numeric", month: "long", year: "numeric",
                         })}
                       </p>
                     </div>
@@ -148,7 +145,10 @@ const MisCitas = () => {
 
                   {/* Quote received */}
                   {req.status === "quoted" && req.quoteAmount && (
-                    <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-3">
+                    <div
+                      className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-3"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <div className="flex items-center gap-2">
                         <AlertCircle className="w-4 h-4 text-primary" />
                         <span className="text-sm font-semibold text-primary">¡Cotización lista!</span>
@@ -173,19 +173,10 @@ const MisCitas = () => {
                         <p className="text-xs text-muted-foreground italic">"{req.quoteNotes}"</p>
                       )}
                       <div className="flex gap-3 pt-1">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1"
-                          onClick={() => setCancelId(req.id)}
-                        >
+                        <Button variant="outline" size="sm" className="flex-1" onClick={() => setCancelId(req.id)}>
                           Rechazar
                         </Button>
-                        <Button
-                          size="sm"
-                          className="flex-1"
-                          onClick={() => handleAcceptQuote(req)}
-                        >
+                        <Button size="sm" className="flex-1" onClick={() => handleAcceptQuote(req)}>
                           Aceptar y Pagar
                         </Button>
                       </div>
@@ -196,7 +187,7 @@ const MisCitas = () => {
                   {(req.status === "accepted" || req.status === "paid") && (
                     <Button
                       size="sm"
-                      onClick={() => handleContinueFlow(req)}
+                      onClick={(e) => { e.stopPropagation(); handleContinueFlow(req); }}
                       className="w-full"
                     >
                       {req.status === "accepted" ? "Continuar al Pago" : "Agendar Cita"}
@@ -210,9 +201,7 @@ const MisCitas = () => {
                       <div>
                         <p className="text-sm font-semibold text-foreground">
                           {new Date(req.selectedDate).toLocaleDateString("es-MX", {
-                            weekday: "long",
-                            day: "numeric",
-                            month: "long",
+                            weekday: "long", day: "numeric", month: "long",
                           })} — {req.selectedTime} hrs
                         </p>
                         <p className="text-xs text-muted-foreground">Cita confirmada</p>
@@ -220,13 +209,19 @@ const MisCitas = () => {
                     </div>
                   )}
 
+                  {/* View details hint */}
+                  <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground pt-1">
+                    <Eye className="w-3.5 h-3.5" />
+                    Toca para ver detalles y contactar
+                  </div>
+
                   {/* Cancel button for non-terminal states */}
                   {!["cancelled", "confirmed", "scheduled"].includes(req.status) && req.status !== "quoted" && (
                     <Button
                       variant="ghost"
                       size="sm"
                       className="text-destructive hover:text-destructive"
-                      onClick={() => setCancelId(req.id)}
+                      onClick={(e) => { e.stopPropagation(); setCancelId(req.id); }}
                     >
                       Cancelar solicitud
                     </Button>
@@ -240,23 +235,14 @@ const MisCitas = () => {
               <div className="mt-8">
                 <h3 className="text-sm font-semibold text-muted-foreground mb-3">Canceladas</h3>
                 {cancelledRequests.map((req) => (
-                  <div
-                    key={req.id}
-                    className="rounded-xl border border-border/50 bg-muted/20 p-4 opacity-60 mb-2"
-                  >
+                  <div key={req.id} className="rounded-xl border border-border/50 bg-muted/20 p-4 opacity-60 mb-2">
                     <div className="flex items-center gap-3">
-                      <img
-                        src={req.artistImage}
-                        alt={req.artistName}
-                        className="w-8 h-8 rounded-full object-cover grayscale"
-                      />
+                      <img src={req.artistImage} alt={req.artistName} className="w-8 h-8 rounded-full object-cover grayscale" />
                       <div>
                         <p className="text-sm font-medium text-foreground">{req.artistName}</p>
                         <p className="text-xs text-muted-foreground">{req.style} • {req.sizeWidth}×{req.sizeHeight} cm</p>
                       </div>
-                      <Badge variant="secondary" className="ml-auto bg-destructive/10 text-destructive">
-                        Cancelada
-                      </Badge>
+                      <Badge variant="secondary" className="ml-auto bg-destructive/10 text-destructive">Cancelada</Badge>
                     </div>
                   </div>
                 ))}
@@ -271,9 +257,7 @@ const MisCitas = () => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>¿Cancelar solicitud?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer. La solicitud será cancelada permanentemente.
-            </AlertDialogDescription>
+            <AlertDialogDescription>Esta acción no se puede deshacer. La solicitud será cancelada permanentemente.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>No, mantener</AlertDialogCancel>
@@ -289,6 +273,15 @@ const MisCitas = () => {
           open={!!continueRequest}
           onOpenChange={(open) => !open && setContinueRequest(null)}
           onComplete={handleFlowComplete}
+        />
+      )}
+
+      {/* Detail dialog */}
+      {detailRequest && (
+        <BookingDetailDialog
+          request={detailRequest}
+          open={!!detailRequest}
+          onOpenChange={(open) => !open && setDetailRequest(null)}
         />
       )}
     </div>

@@ -52,7 +52,7 @@ const BookingDetailDialog = ({ request, open, onOpenChange }: Props) => {
                 {artist && (
                   <p className="text-sm text-muted-foreground flex items-center gap-1">
                     <MapPin className="w-3.5 h-3.5" />
-                    {artist.location}
+                    {artist.city}
                   </p>
                 )}
                 <p className="text-xs text-muted-foreground mt-0.5">
