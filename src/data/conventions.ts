@@ -11,10 +11,17 @@ export interface TicketTier {
   available: boolean;
 }
 
+export interface ConventionArtist {
+  slug: string;
+  available: boolean;
+  bookedClients: number;
+}
+
 export interface Convention {
   slug: string;
   name: string;
   image: string;
+  gallery: string[];
   city: string;
   venue: string;
   address: string;
@@ -23,6 +30,7 @@ export interface Convention {
   description: string;
   styles: string[];
   artistSlugs: string[];
+  artistDetails: ConventionArtist[];
   tickets: TicketTier[];
   website?: string;
   instagram?: string;
