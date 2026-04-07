@@ -1,7 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
-import { MapPin, CalendarDays, Globe, Instagram, ArrowLeft, Ticket, Check, X } from "lucide-react";
+import { MapPin, CalendarDays, Globe, Instagram, ArrowLeft, Ticket, Check, Users } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { getConventionBySlug } from "@/data/conventions";
 import { artists } from "@/data/artists";
+import ConventionGallery from "@/components/conventions/ConventionGallery";
 
 const ConventionDetail = () => {
   const { slug } = useParams();
@@ -29,6 +30,7 @@ const ConventionDetail = () => {
   }
 
   const participatingArtists = artists.filter((a) => convention.artistSlugs.includes(a.slug));
+  const artistDetailsMap = new Map(convention.artistDetails.map((d) => [d.slug, d]));
 
   return (
     <div className="min-h-screen bg-background">
@@ -56,13 +58,11 @@ const ConventionDetail = () => {
       <div className="px-6 max-w-5xl mx-auto py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main content */}
         <div className="lg:col-span-2 space-y-8">
-          {/* Description */}
           <div>
             <h2 className="text-xl font-bold text-foreground mb-3">Sobre el evento</h2>
             <p className="text-muted-foreground leading-relaxed">{convention.description}</p>
           </div>
 
-          {/* Styles */}
           <div>
             <h3 className="text-lg font-semibold text-foreground mb-3">Estilos presentes</h3>
             <div className="flex flex-wrap gap-2">
@@ -74,38 +74,57 @@ const ConventionDetail = () => {
 
           <Separator />
 
-          {/* Artists */}
+          {/* Gallery */}
+          <ConventionGallery images={convention.gallery} name={convention.name} />
+
+          <Separator />
+
+          {/* Artists with availability */}
           <div>
             <h2 className="text-xl font-bold text-foreground mb-4">
               Tatuadores Participantes ({participatingArtists.length})
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {participatingArtists.map((artist) => (
-                <Link key={artist.slug} to={`/tatuador/${artist.slug}`}>
-                  <Card className="flex items-center gap-4 p-4 hover:border-primary/50 transition-colors bg-card border-border">
-                    <img
-                      src={artist.image}
-                      alt={artist.name}
-                      className="w-14 h-14 rounded-full object-cover"
-                      loading="lazy"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-foreground truncate">{artist.name}</p>
-                      <p className="text-sm text-muted-foreground">{artist.specialty} · {artist.city}</p>
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <span className="text-xs text-primary">★ {artist.rating}</span>
+              {participatingArtists.map((artist) => {
+                const details = artistDetailsMap.get(artist.slug);
+                const isAvailable = details?.available ?? true;
+                const booked = details?.bookedClients ?? 0;
+
+                return (
+                  <Link key={artist.slug} to={`/tatuador/${artist.slug}`}>
+                    <Card className="flex items-center gap-4 p-4 hover:border-primary/50 transition-colors bg-card border-border">
+                      <img
+                        src={artist.image}
+                        alt={artist.name}
+                        className="w-14 h-14 rounded-full object-cover"
+                        loading="lazy"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-foreground truncate">{artist.name}</p>
+                        <p className="text-sm text-muted-foreground">{artist.specialty} · {artist.city}</p>
+                        <div className="flex items-center gap-3 mt-1.5">
+                          <Badge
+                            variant={isAvailable ? "default" : "secondary"}
+                            className={`text-[10px] px-1.5 py-0 ${isAvailable ? "" : "opacity-70"}`}
+                          >
+                            {isAvailable ? "Disponible" : "No disponible"}
+                          </Badge>
+                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Users className="w-3 h-3" />
+                            {booked} {booked === 1 ? "cliente agendado" : "clientes agendados"}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  </Card>
-                </Link>
-              ))}
+                    </Card>
+                  </Link>
+                );
+              })}
             </div>
             {participatingArtists.length === 0 && (
               <p className="text-muted-foreground text-sm">Próximamente se anunciarán los artistas.</p>
             )}
           </div>
 
-          {/* Location */}
           <Separator />
           <div>
             <h2 className="text-xl font-bold text-foreground mb-3">Ubicación</h2>
@@ -116,7 +135,7 @@ const ConventionDetail = () => {
           </div>
         </div>
 
-        {/* Sidebar - Tickets */}
+        {/* Sidebar */}
         <div className="space-y-4">
           <Card className="bg-card border-border sticky top-24">
             <CardHeader>
@@ -155,7 +174,6 @@ const ConventionDetail = () => {
 
               <Separator />
 
-              {/* Links */}
               <div className="flex flex-col gap-2">
                 {convention.website && (
                   <a
