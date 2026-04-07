@@ -5,7 +5,6 @@ import { es } from "date-fns/locale";
 import { MapPin, CalendarDays, Filter, X, Ticket } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -34,7 +33,6 @@ const Convenciones = () => {
     });
   }, [cityFilter, styleFilter, selectedDate]);
 
-  // Dates that have conventions for calendar highlighting
   const conventionDates = useMemo(() => {
     const dates: Date[] = [];
     conventions.forEach((c) => {
@@ -110,7 +108,6 @@ const Convenciones = () => {
           )}
         </div>
 
-        {/* Calendar */}
         {showCalendar && (
           <div className="mb-8 flex justify-center">
             <div className="bg-card border border-border rounded-lg p-2">
@@ -132,7 +129,6 @@ const Convenciones = () => {
           </div>
         )}
 
-        {/* Results */}
         <p className="text-sm text-muted-foreground mb-4">
           {filtered.length} {filtered.length === 1 ? "convención encontrada" : "convenciones encontradas"}
         </p>
@@ -149,13 +145,11 @@ const Convenciones = () => {
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
-                  <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
-                    <div>
-                      <h3 className="text-lg font-bold text-foreground">{conv.name}</h3>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <MapPin className="w-3 h-3" />
-                        {conv.city} · {conv.venue}
-                      </div>
+                  <div className="absolute bottom-3 left-3 right-3">
+                    <h3 className="text-lg font-bold text-foreground">{conv.name}</h3>
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <MapPin className="w-3 h-3" />
+                      {conv.city} · {conv.venue}
                     </div>
                   </div>
                 </div>
@@ -165,15 +159,6 @@ const Convenciones = () => {
                     <span className="text-sm text-foreground">
                       {format(parseISO(conv.dateFrom), "d MMM", { locale: es })} – {format(parseISO(conv.dateTo), "d MMM yyyy", { locale: es })}
                     </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{conv.description}</p>
-                  <div className="flex flex-wrap gap-1.5 mb-3">
-                    {conv.styles.slice(0, 4).map((s) => (
-                      <Badge key={s} variant="secondary" className="text-xs">{s}</Badge>
-                    ))}
-                    {conv.styles.length > 4 && (
-                      <Badge variant="secondary" className="text-xs">+{conv.styles.length - 4}</Badge>
-                    )}
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-muted-foreground">
