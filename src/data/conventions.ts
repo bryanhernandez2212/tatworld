@@ -41,6 +41,7 @@ export const conventions: Convention[] = [
     slug: "expo-tattoo-cdmx-2026",
     name: "Expo Tattoo CDMX 2026",
     image: convention1,
+    gallery: [convention1, convention2, convention3],
     city: "CDMX",
     venue: "World Trade Center CDMX",
     address: "Montecito 38, Nápoles, Benito Juárez",
@@ -49,6 +50,11 @@ export const conventions: Convention[] = [
     description: "La convención de tatuajes más grande de México. Más de 200 artistas nacionales e internacionales, concursos en vivo, música y stands de proveedores.",
     styles: ["Realismo", "Neotradicional", "Blackwork", "Old School", "Japonés"],
     artistSlugs: ["valentina-reyes", "diego-hernandez", "mateo-garcia"],
+    artistDetails: [
+      { slug: "valentina-reyes", available: true, bookedClients: 5 },
+      { slug: "diego-hernandez", available: true, bookedClients: 3 },
+      { slug: "mateo-garcia", available: false, bookedClients: 8 },
+    ],
     tickets: [
       { name: "General", price: 350, currency: "MXN", perks: ["Acceso al evento", "Mapa del evento"], available: true },
       { name: "VIP", price: 800, currency: "MXN", perks: ["Acceso al evento", "Zona VIP", "Bebida incluida", "Meet & Greet artistas"], available: true },
@@ -61,6 +67,7 @@ export const conventions: Convention[] = [
     slug: "ink-festival-guadalajara",
     name: "Ink Festival Guadalajara",
     image: convention2,
+    gallery: [convention2, convention4],
     city: "Guadalajara",
     venue: "Expo Guadalajara",
     address: "Av. Mariano Otero 1499, Verde Valle",
@@ -69,6 +76,10 @@ export const conventions: Convention[] = [
     description: "Festival de tinta con sabor tapatío. Artistas de todo el país, concursos de flash, DJ sets y gastronomía local.",
     styles: ["Neotradicional", "Acuarela", "Floral", "Ilustrativo", "Color"],
     artistSlugs: ["camila-orozco", "andrea-lopez"],
+    artistDetails: [
+      { slug: "camila-orozco", available: true, bookedClients: 2 },
+      { slug: "andrea-lopez", available: true, bookedClients: 4 },
+    ],
     tickets: [
       { name: "General", price: 280, currency: "MXN", perks: ["Acceso al evento"], available: true },
       { name: "VIP", price: 650, currency: "MXN", perks: ["Acceso al evento", "Zona VIP", "Poster exclusivo"], available: true },
@@ -80,6 +91,7 @@ export const conventions: Convention[] = [
     slug: "tattoo-underground-monterrey",
     name: "Tattoo Underground MTY",
     image: convention3,
+    gallery: [convention3, convention1],
     city: "Monterrey",
     venue: "Nave Lewis",
     address: "Padre Mier 927, Centro",
@@ -88,6 +100,10 @@ export const conventions: Convention[] = [
     description: "Convención alternativa enfocada en blackwork, dotwork y estilos experimentales. Ambiente íntimo con los mejores artistas del norte de México.",
     styles: ["Blackwork", "Dotwork", "Geométrico", "Tribal Moderno", "Minimalista"],
     artistSlugs: ["sofia-mendoza", "luna-cervantes"],
+    artistDetails: [
+      { slug: "sofia-mendoza", available: true, bookedClients: 1 },
+      { slug: "luna-cervantes", available: false, bookedClients: 6 },
+    ],
     tickets: [
       { name: "General", price: 250, currency: "MXN", perks: ["Acceso al evento"], available: true },
       { name: "Pase Weekend", price: 500, currency: "MXN", perks: ["Acceso sábado y domingo", "Sticker pack"], available: true },
@@ -98,6 +114,7 @@ export const conventions: Convention[] = [
     slug: "tinta-y-cultura-oaxaca",
     name: "Tinta y Cultura Oaxaca",
     image: convention4,
+    gallery: [convention4, convention2, convention3],
     city: "Oaxaca",
     venue: "Centro Cultural Santo Domingo",
     address: "Macedonio Alcalá s/n, Centro",
@@ -106,6 +123,12 @@ export const conventions: Convention[] = [
     description: "Celebración de la cultura del tatuaje con raíces oaxaqueñas. Arte, mezcal, música en vivo y tatuadores que fusionan lo tradicional con lo contemporáneo.",
     styles: ["Mexicano", "Old School", "Neotradicional", "Realismo", "Ilustrativo"],
     artistSlugs: ["diego-hernandez", "valentina-reyes", "luna-cervantes", "carlos-ramirez"],
+    artistDetails: [
+      { slug: "diego-hernandez", available: true, bookedClients: 2 },
+      { slug: "valentina-reyes", available: true, bookedClients: 7 },
+      { slug: "luna-cervantes", available: false, bookedClients: 5 },
+      { slug: "carlos-ramirez", available: true, bookedClients: 0 },
+    ],
     tickets: [
       { name: "General", price: 200, currency: "MXN", perks: ["Acceso al evento"], available: true },
       { name: "VIP", price: 550, currency: "MXN", perks: ["Acceso al evento", "Zona VIP", "Mezcal de bienvenida", "Artprint exclusivo"], available: true },
