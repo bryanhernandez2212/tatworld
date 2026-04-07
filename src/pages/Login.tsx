@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, LogIn, User, Palette } from "lucide-react";
 import { UserRole } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
+import AgeVerificationDialog from "@/components/AgeVerificationDialog";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -16,7 +17,8 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState<UserRole>("client");
-  const { quickLogin } = useAuth();
+  const [showAgeDialog, setShowAgeDialog] = useState(false);
+  const { quickLogin, updateProfile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -25,13 +27,28 @@ const Login = () => {
     setLoading(true);
     quickLogin(selectedRole);
     setLoading(false);
+
+    if (selectedRole === "client") {
+      setShowAgeDialog(true);
+    } else {
+      toast({
+        title: "¡Bienvenido!",
+        description: "Has iniciado sesión como tatuador.",
+      });
+      navigate("/dashboard");
+    }
+  };
+
+  const handleAgeConfirm = (isMinor: boolean) => {
+    setShowAgeDialog(false);
+    updateProfile({ isMinor });
     toast({
       title: "¡Bienvenido!",
-      description: selectedRole === "artist"
-        ? "Has iniciado sesión como tatuador."
+      description: isMinor
+        ? "Has iniciado sesión. Recuerda que necesitarás un tutor para tus citas."
         : "Has iniciado sesión correctamente.",
     });
-    navigate(selectedRole === "artist" ? "/dashboard" : "/");
+    navigate("/");
   };
 
   return (
@@ -127,6 +144,7 @@ const Login = () => {
           </form>
         </Card>
       </div>
+      <AgeVerificationDialog open={showAgeDialog} onConfirm={handleAgeConfirm} />
     </div>
   );
 };

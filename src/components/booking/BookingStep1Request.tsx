@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Upload, ImagePlus, X } from "lucide-react";
 import type { Artist } from "@/data/artists";
 import type { BookingData } from "./BookingFlow";
+import { useAuth } from "@/contexts/AuthContext";
+import GuardianIdSection from "./GuardianIdSection";
 
 interface Props {
   data: BookingData;
@@ -16,6 +18,10 @@ interface Props {
 }
 
 const BookingStep1Request = ({ data, updateData, artist, onNext }: Props) => {
+  const { user } = useAuth();
+  const isMinor = user?.isMinor === true;
+  const [guardianName, setGuardianName] = useState("");
+  const [guardianIdPhoto, setGuardianIdPhoto] = useState<File | null>(null);
   const [previews, setPreviews] = useState<string[]>([]);
   const [bodyPreview, setBodyPreview] = useState<string | null>(null);
   const [refPreviews, setRefPreviews] = useState<string[]>([]);
@@ -57,7 +63,8 @@ const BookingStep1Request = ({ data, updateData, artist, onNext }: Props) => {
     });
   };
 
-  const isValid = data.description.trim().length > 0 && data.style;
+  const guardianValid = !isMinor || (guardianName.trim().length > 0 && guardianIdPhoto !== null);
+  const isValid = data.description.trim().length > 0 && data.style && guardianValid;
 
   return (
     <div className="space-y-5">
@@ -201,6 +208,17 @@ const BookingStep1Request = ({ data, updateData, artist, onNext }: Props) => {
           </div>
         )}
       </div>
+
+      {isMinor && (
+        <GuardianIdSection
+          guardianName={guardianName}
+          guardianIdPhoto={guardianIdPhoto}
+          onUpdate={(d) => {
+            if (d.guardianName !== undefined) setGuardianName(d.guardianName);
+            if (d.guardianIdPhoto !== undefined) setGuardianIdPhoto(d.guardianIdPhoto);
+          }}
+        />
+      )}
 
       <Button onClick={onNext} disabled={!isValid} className="w-full">
         Enviar Solicitud

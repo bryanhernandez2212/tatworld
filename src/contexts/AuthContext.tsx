@@ -12,6 +12,7 @@ export interface UserProfile {
   phone?: string;
   city?: string;
   createdAt: string;
+  isMinor?: boolean;
   // Artist-specific fields
   styles?: string[];
   priceRange?: string;
