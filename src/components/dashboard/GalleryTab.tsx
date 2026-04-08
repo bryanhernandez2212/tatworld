@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, Upload, X } from "lucide-react";
+import { Plus, Trash2, Upload, ImageIcon } from "lucide-react";
 
 const TATTOO_STYLES = [
   "Realismo", "Blackwork", "Neo-tradicional", "Old School", "Japonés",
@@ -34,13 +34,27 @@ export default function GalleryTab({ user, updateProfile, toast }: Props) {
   );
 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState<GalleryItem>({ url: "", name: "", style: "", description: "", mentions: "" });
+  const [form, setForm] = useState<Omit<GalleryItem, "url">>({ name: "", style: "", description: "", mentions: "" });
+  const [preview, setPreview] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  const resetForm = () => setForm({ url: "", name: "", style: "", description: "", mentions: "" });
+  const resetForm = () => {
+    setForm({ name: "", style: "", description: "", mentions: "" });
+    setPreview(null);
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setPreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
 
   const addImage = () => {
-    if (!form.url.trim() || !form.name.trim()) return;
-    updateProfile({ gallery: [...gallery, { ...form }] });
+    if (!preview || !form.name.trim()) return;
+    updateProfile({ gallery: [...gallery, { ...form, url: preview }] });
     resetForm();
     setDialogOpen(false);
     toast({ title: "Tatuaje agregado a la galería" });
@@ -94,19 +108,40 @@ export default function GalleryTab({ user, updateProfile, toast }: Props) {
         </CardContent>
       </Card>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog open={dialogOpen} onOpenChange={(o) => { if (!o) resetForm(); setDialogOpen(o); }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Agregar Tatuaje</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Nombre *</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ej: Dragón en tinta negra" />
+              <Label>Imagen *</Label>
+              <div
+                onClick={() => fileRef.current?.click()}
+                className="relative flex flex-col items-center justify-center border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/50 transition-colors overflow-hidden"
+                style={{ minHeight: preview ? "auto" : "120px" }}
+              >
+                {preview ? (
+                  <img src={preview} alt="Preview" className="w-full max-h-48 object-contain" />
+                ) : (
+                  <>
+                    <ImageIcon className="h-8 w-8 text-muted-foreground mb-2" />
+                    <p className="text-sm text-muted-foreground">Haz clic para seleccionar una imagen</p>
+                    <p className="text-xs text-muted-foreground">JPG, PNG, WEBP</p>
+                  </>
+                )}
+              </div>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFile}
+                className="hidden"
+              />
             </div>
             <div className="space-y-2">
-              <Label>URL de la imagen *</Label>
-              <Input value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} placeholder="https://..." />
+              <Label>Nombre *</Label>
+              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ej: Dragón en tinta negra" />
             </div>
             <div className="space-y-2">
               <Label>Tipo de tatuaje</Label>
@@ -130,7 +165,7 @@ export default function GalleryTab({ user, updateProfile, toast }: Props) {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => { resetForm(); setDialogOpen(false); }}>Cancelar</Button>
-            <Button onClick={addImage} disabled={!form.url.trim() || !form.name.trim()}>Agregar</Button>
+            <Button onClick={addImage} disabled={!preview || !form.name.trim()}>Agregar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
