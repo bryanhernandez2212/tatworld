@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Trash2, Zap } from "lucide-react";
+import { Plus, Trash2, Zap, ImageIcon } from "lucide-react";
 
 interface FlashItem {
   url: string;
@@ -26,13 +26,27 @@ export default function FlashTab({ user, updateProfile, toast }: Props) {
   );
 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState<FlashItem>({ url: "", name: "", price: 0, width: 0, height: 0 });
+  const [form, setForm] = useState<Omit<FlashItem, "url">>({ name: "", price: 0, width: 0, height: 0 });
+  const [preview, setPreview] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  const resetForm = () => setForm({ url: "", name: "", price: 0, width: 0, height: 0 });
+  const resetForm = () => {
+    setForm({ name: "", price: 0, width: 0, height: 0 });
+    setPreview(null);
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setPreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
 
   const addFlash = () => {
-    if (!form.url.trim() || !form.name.trim()) return;
-    updateProfile({ flashDesigns: [...flashDesigns, { ...form }] });
+    if (!preview || !form.name.trim()) return;
+    updateProfile({ flashDesigns: [...flashDesigns, { ...form, url: preview }] });
     resetForm();
     setDialogOpen(false);
     toast({ title: "Flash design agregado" });
@@ -89,19 +103,40 @@ export default function FlashTab({ user, updateProfile, toast }: Props) {
         </CardContent>
       </Card>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog open={dialogOpen} onOpenChange={(o) => { if (!o) resetForm(); setDialogOpen(o); }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Agregar Flash Design</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Nombre *</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ej: Rosa minimalista" />
+              <Label>Imagen *</Label>
+              <div
+                onClick={() => fileRef.current?.click()}
+                className="relative flex flex-col items-center justify-center border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/50 transition-colors overflow-hidden"
+                style={{ minHeight: preview ? "auto" : "120px" }}
+              >
+                {preview ? (
+                  <img src={preview} alt="Preview" className="w-full max-h-48 object-contain" />
+                ) : (
+                  <>
+                    <ImageIcon className="h-8 w-8 text-muted-foreground mb-2" />
+                    <p className="text-sm text-muted-foreground">Haz clic para seleccionar una imagen</p>
+                    <p className="text-xs text-muted-foreground">JPG, PNG, WEBP</p>
+                  </>
+                )}
+              </div>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFile}
+                className="hidden"
+              />
             </div>
             <div className="space-y-2">
-              <Label>URL de la imagen *</Label>
-              <Input value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} placeholder="https://..." />
+              <Label>Nombre *</Label>
+              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ej: Rosa minimalista" />
             </div>
             <div className="space-y-2">
               <Label>Precio (MXN)</Label>
@@ -120,7 +155,7 @@ export default function FlashTab({ user, updateProfile, toast }: Props) {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => { resetForm(); setDialogOpen(false); }}>Cancelar</Button>
-            <Button onClick={addFlash} disabled={!form.url.trim() || !form.name.trim()}>Agregar</Button>
+            <Button onClick={addFlash} disabled={!preview || !form.name.trim()}>Agregar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
