@@ -25,8 +25,10 @@ const Navbar = () => {
 
   const isArtist = user?.role === "artist";
   const isSupplier = user?.role === "supplier";
-  const dashboardPath = isArtist ? "/dashboard" : isSupplier ? "/dashboard-proveedor" : "";
-  const roleLabel = isArtist ? "Tatuador" : isSupplier ? "Proveedor" : "Cliente";
+  const isAdmin = user?.role === "admin";
+  const hasDashboard = isArtist || isSupplier || isAdmin;
+  const dashboardPath = isArtist ? "/dashboard" : isSupplier ? "/dashboard-proveedor" : isAdmin ? "/admin" : "";
+  const roleLabel = isArtist ? "Tatuador" : isSupplier ? "Proveedor" : isAdmin ? "Administrador" : "Cliente";
 
   const navLinks = [
     { to: "/", label: "Buscar Tatuadores" },
@@ -60,7 +62,7 @@ const Navbar = () => {
                 <span>Mis Citas</span>
               </Link>
             )}
-            {user && (isArtist || isSupplier) && (
+            {user && hasDashboard && (
               <Link to={dashboardPath} className="flex items-center gap-1.5 text-sm text-foreground hover:text-primary transition-colors">
                 <LayoutDashboard className="w-4 h-4" />
                 <span>Mi Panel</span>
@@ -85,7 +87,7 @@ const Navbar = () => {
                   <p className="text-xs text-muted-foreground">{roleLabel}</p>
                 </div>
                 <DropdownMenuSeparator />
-                {(isArtist || isSupplier) && (
+                {hasDashboard && (
                   <DropdownMenuItem onClick={() => navigate(dashboardPath)} className="cursor-pointer">
                     <LayoutDashboard className="w-4 h-4 mr-2" />
                     Mi Panel
@@ -143,7 +145,7 @@ const Navbar = () => {
             </Link>
           )}
 
-          {user && (isArtist || isSupplier) && (
+          {user && hasDashboard && (
             <Link
               to={dashboardPath}
               onClick={() => setMobileOpen(false)}

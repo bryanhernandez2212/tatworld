@@ -14,6 +14,7 @@ import Convenciones from "./pages/Convenciones.tsx";
 import ConventionDetail from "./pages/ConventionDetail.tsx";
 import Login from "./pages/Login.tsx";
 import SupplierDashboard from "./pages/SupplierDashboard.tsx";
+import AdminDashboard from "./pages/AdminDashboard.tsx";
 import Register from "./pages/Register.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/tatuador/:slug" element={<ArtistProfile />} />
             <Route path="/dashboard" element={<ArtistDashboard />} />
             <Route path="/dashboard-proveedor" element={<SupplierDashboard />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/mis-citas" element={<MisCitas />} />
             <Route path="/proveedores" element={<Proveedores />} />
             <Route path="/proveedor/:slug" element={<SupplierProfile />} />
