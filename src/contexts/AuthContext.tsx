@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-export type UserRole = "client" | "artist" | "supplier";
+export type UserRole = "client" | "artist" | "supplier" | "admin";
 
 export interface UserProfile {
   id: string;
@@ -76,19 +76,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const quickLogin = (role: UserRole = "client") => {
     const isArtist = role === "artist";
     const isSupplier = role === "supplier";
+    const isAdmin = role === "admin";
     const getId = () => {
       if (isArtist) return "mock-artist-001";
       if (isSupplier) return "mock-supplier-001";
+      if (isAdmin) return "mock-admin-001";
       return "mock-user-001";
     };
     const getEmail = () => {
       if (isArtist) return "artista@tattsnearby.com";
       if (isSupplier) return "proveedor@tattsnearby.com";
+      if (isAdmin) return "admin@tattsnearby.com";
       return "usuario@tattsnearby.com";
     };
     const getName = () => {
       if (isArtist) return "Artista Demo";
       if (isSupplier) return "Proveedor Demo";
+      if (isAdmin) return "Administrador";
       return "Usuario Demo";
     };
     const mockProfile: UserProfile = {
