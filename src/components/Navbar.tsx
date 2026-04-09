@@ -24,6 +24,9 @@ const Navbar = () => {
   };
 
   const isArtist = user?.role === "artist";
+  const isSupplier = user?.role === "supplier";
+  const dashboardPath = isArtist ? "/dashboard" : isSupplier ? "/dashboard-proveedor" : "";
+  const roleLabel = isArtist ? "Tatuador" : isSupplier ? "Proveedor" : "Cliente";
 
   const navLinks = [
     { to: "/", label: "Buscar Tatuadores" },
@@ -51,14 +54,14 @@ const Navbar = () => {
         <div className="flex items-center gap-4">
           {/* Desktop user links */}
           <div className="hidden md:flex items-center gap-4">
-            {user && !isArtist && (
+            {user && user.role === "client" && (
               <Link to="/mis-citas" className="flex items-center gap-1.5 text-sm text-foreground hover:text-primary transition-colors">
                 <CalendarDays className="w-4 h-4" />
                 <span>Mis Citas</span>
               </Link>
             )}
-            {user && isArtist && (
-              <Link to="/dashboard" className="flex items-center gap-1.5 text-sm text-foreground hover:text-primary transition-colors">
+            {user && (isArtist || isSupplier) && (
+              <Link to={dashboardPath} className="flex items-center gap-1.5 text-sm text-foreground hover:text-primary transition-colors">
                 <LayoutDashboard className="w-4 h-4" />
                 <span>Mi Panel</span>
               </Link>
@@ -79,11 +82,11 @@ const Navbar = () => {
               <DropdownMenuContent align="end" className="w-44">
                 <div className="px-2 py-1.5">
                   <p className="text-sm font-medium text-foreground">{user.name}</p>
-                  <p className="text-xs text-muted-foreground">{isArtist ? "Tatuador" : "Cliente"}</p>
+                  <p className="text-xs text-muted-foreground">{roleLabel}</p>
                 </div>
                 <DropdownMenuSeparator />
-                {isArtist && (
-                  <DropdownMenuItem onClick={() => navigate("/dashboard")} className="cursor-pointer">
+                {(isArtist || isSupplier) && (
+                  <DropdownMenuItem onClick={() => navigate(dashboardPath)} className="cursor-pointer">
                     <LayoutDashboard className="w-4 h-4 mr-2" />
                     Mi Panel
                   </DropdownMenuItem>
@@ -130,7 +133,7 @@ const Navbar = () => {
             </Link>
           ))}
 
-          {user && !isArtist && (
+          {user && user.role === "client" && (
             <Link
               to="/mis-citas"
               onClick={() => setMobileOpen(false)}
@@ -140,9 +143,9 @@ const Navbar = () => {
             </Link>
           )}
 
-          {user && isArtist && (
+          {user && (isArtist || isSupplier) && (
             <Link
-              to="/dashboard"
+              to={dashboardPath}
               onClick={() => setMobileOpen(false)}
               className="flex items-center gap-2 text-foreground hover:text-primary transition-colors py-2 text-base font-medium"
             >

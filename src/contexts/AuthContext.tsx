@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-export type UserRole = "client" | "artist";
+export type UserRole = "client" | "artist" | "supplier";
 
 export interface UserProfile {
   id: string;
@@ -19,6 +19,12 @@ export interface UserProfile {
   instagram?: string;
   gallery?: string[];
   flashDesigns?: string[];
+  // Supplier-specific fields
+  companyName?: string;
+  description?: string;
+  products?: any[];
+  promotions?: any[];
+  sponsoredArtists?: string[];
 }
 
 interface AuthContextType {
@@ -69,10 +75,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const quickLogin = (role: UserRole = "client") => {
     const isArtist = role === "artist";
+    const isSupplier = role === "supplier";
+    const getId = () => {
+      if (isArtist) return "mock-artist-001";
+      if (isSupplier) return "mock-supplier-001";
+      return "mock-user-001";
+    };
+    const getEmail = () => {
+      if (isArtist) return "artista@tattsnearby.com";
+      if (isSupplier) return "proveedor@tattsnearby.com";
+      return "usuario@tattsnearby.com";
+    };
+    const getName = () => {
+      if (isArtist) return "Artista Demo";
+      if (isSupplier) return "Proveedor Demo";
+      return "Usuario Demo";
+    };
     const mockProfile: UserProfile = {
-      id: isArtist ? "mock-artist-001" : "mock-user-001",
-      email: isArtist ? "artista@tattsnearby.com" : "usuario@tattsnearby.com",
-      name: isArtist ? "Artista Demo" : "Usuario Demo",
+      id: getId(),
+      email: getEmail(),
+      name: getName(),
       role,
       city: "Ciudad de México",
       createdAt: new Date().toISOString(),
@@ -82,6 +104,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         bio: "Tatuador profesional con 5 años de experiencia",
         gallery: [],
         flashDesigns: [],
+      }),
+      ...(isSupplier && {
+        companyName: "Proveedor Demo S.A.",
+        description: "Proveedor de insumos para tatuaje de alta calidad",
+        products: [],
+        promotions: [],
+        sponsoredArtists: [],
       }),
     };
     setUser(mockProfile);
