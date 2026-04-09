@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, LogIn, User, Palette } from "lucide-react";
+import { Eye, EyeOff, LogIn, User, Palette, Store } from "lucide-react";
 import { UserRole } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import AgeVerificationDialog from "@/components/AgeVerificationDialog";
@@ -30,12 +30,18 @@ const Login = () => {
 
     if (selectedRole === "client") {
       setShowAgeDialog(true);
-    } else {
+    } else if (selectedRole === "artist") {
       toast({
         title: "¡Bienvenido!",
         description: "Has iniciado sesión como tatuador.",
       });
       navigate("/dashboard");
+    } else {
+      toast({
+        title: "¡Bienvenido!",
+        description: "Has iniciado sesión como proveedor.",
+      });
+      navigate("/dashboard-proveedor");
     }
   };
 
@@ -68,7 +74,7 @@ const Login = () => {
               {/* Role selector */}
               <div className="space-y-2">
                 <Label>Tipo de cuenta</Label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-3">
                   <button
                     type="button"
                     onClick={() => setSelectedRole("client")}
@@ -94,6 +100,19 @@ const Login = () => {
                     <Palette className="h-6 w-6" />
                     <span className="text-sm font-medium">Tatuador</span>
                     <span className="text-xs text-center opacity-70">Soy artista</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedRole("supplier")}
+                    className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
+                      selectedRole === "supplier"
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-secondary/30 text-muted-foreground hover:border-muted-foreground"
+                    }`}
+                  >
+                    <Store className="h-6 w-6" />
+                    <span className="text-sm font-medium">Proveedor</span>
+                    <span className="text-xs text-center opacity-70">Vendo insumos</span>
                   </button>
                 </div>
               </div>
