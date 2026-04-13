@@ -38,8 +38,8 @@ const ArtistProfile = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
           <div className="lg:col-span-2 space-y-8">
-            <ArtistGallery gallery={artist.gallery} />
-            <ArtistFlashDesigns designs={artist.flashDesigns} />
+            <ArtistGallery gallery={artist.gallery} artistName={artist.name} artistImage={artist.image} />
+            <ArtistFlashDesigns designs={artist.flashDesigns} artistName={artist.name} artistImage={artist.image} />
             <ArtistGuestSpots spots={artist.guestSpots} />
             <ArtistReviews reviews={artist.reviews} rating={artist.rating} />
           </div>

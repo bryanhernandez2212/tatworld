@@ -95,12 +95,12 @@ export const artists: Artist[] = [
       { author: "Ana R.", rating: 4, text: "Muy buen trabajo, el estudio es limpio y ella es muy amable. Totalmente recomendada.", date: "2023-12-10" },
     ],
     gallery: [
-      { image: gallery1, style: "Realismo" },
-      { image: gallery2, style: "Neotradicional" },
-      { image: gallery3, style: "Blackwork" },
-      { image: gallery4, style: "Japonés" },
-      { image: gallery5, style: "Acuarela" },
-      { image: gallery6, style: "Dotwork" },
+      { image: gallery1, style: "Realismo", description: "Retrato hiperrealista en black & grey. 6 horas de sesión 🖤", location: "Obsidian Ink Studio, CDMX", mentions: ["@cliente_feliz", "@obsidianink"] },
+      { image: gallery2, style: "Neotradicional", description: "Rosa neotradicional con detalles de color vibrante 🌹", location: "Roma Norte, CDMX", mentions: ["@worldfamousink"] },
+      { image: gallery3, style: "Blackwork", description: "Pieza de blackwork geométrico en antebrazo", location: "CDMX" },
+      { image: gallery4, style: "Japonés", description: "Dragón japonés en media manga. Proyecto de 3 sesiones 🐉", location: "Obsidian Ink Studio", mentions: ["@cheyenne_tattoo"] },
+      { image: gallery5, style: "Acuarela", description: "Técnica mixta acuarela con líneas finas ✨", mentions: ["@arte_liquido"] },
+      { image: gallery6, style: "Dotwork", description: "Mandala en dotwork puro. Más de 10,000 puntos 🔵" },
     ],
     flashDesigns: [
       { image: flash1, title: "Rosa & Daga Clásica", price: 1500, size: "10x8 cm", available: true },
