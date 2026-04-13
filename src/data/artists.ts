@@ -63,7 +63,7 @@ export interface Artist {
   walkIns: boolean;
   sponsors: Sponsor[];
   reviews: Review[];
-  gallery: { image: string; style: string }[];
+  gallery: { image: string; style: string; description?: string; location?: string; mentions?: string[] }[];
   flashDesigns: FlashDesign[];
   guestSpots: GuestSpot[];
   yearsExperience: number;
