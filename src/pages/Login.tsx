@@ -6,52 +6,30 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, LogIn, User, Palette, Store, ShieldCheck } from "lucide-react";
-import { UserRole } from "@/contexts/AuthContext";
+import { Eye, EyeOff, LogIn } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import AgeVerificationDialog from "@/components/AgeVerificationDialog";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<UserRole>("client");
-  const [showAgeDialog, setShowAgeDialog] = useState(false);
-  const { quickLogin, updateProfile } = useAuth();
+  const { login } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    quickLogin(selectedRole);
+    const result = await login(email, password);
     setLoading(false);
 
-    if (selectedRole === "client") {
-      setShowAgeDialog(true);
-    } else if (selectedRole === "artist") {
-      toast({ title: "¡Bienvenido!", description: "Has iniciado sesión como tatuador." });
-      navigate("/dashboard");
-    } else if (selectedRole === "supplier") {
-      toast({ title: "¡Bienvenido!", description: "Has iniciado sesión como proveedor." });
-      navigate("/dashboard-proveedor");
+    if (result.success) {
+      toast({ title: "¡Bienvenido!", description: "Has iniciado sesión correctamente." });
+      navigate("/");
     } else {
-      toast({ title: "¡Bienvenido!", description: "Has iniciado sesión como administrador." });
-      navigate("/admin");
+      toast({ title: "Error", description: result.error, variant: "destructive" });
     }
-  };
-
-  const handleAgeConfirm = (isMinor: boolean) => {
-    setShowAgeDialog(false);
-    updateProfile({ isMinor });
-    toast({
-      title: "¡Bienvenido!",
-      description: isMinor
-        ? "Has iniciado sesión. Recuerda que necesitarás un tutor para tus citas."
-        : "Has iniciado sesión correctamente.",
-    });
-    navigate("/");
   };
 
   return (
@@ -64,69 +42,10 @@ const Login = () => {
               <LogIn className="h-6 w-6 text-primary" />
             </div>
             <CardTitle className="text-2xl text-foreground">Iniciar Sesión</CardTitle>
-            <CardDescription>Selecciona tu tipo de cuenta e ingresa tus credenciales</CardDescription>
+            <CardDescription>Ingresa tu correo y contraseña</CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-5">
-              {/* Role selector */}
-              <div className="space-y-2">
-                <Label>Tipo de cuenta</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedRole("client")}
-                    className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
-                      selectedRole === "client"
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border bg-secondary/30 text-muted-foreground hover:border-muted-foreground"
-                    }`}
-                  >
-                    <User className="h-6 w-6" />
-                    <span className="text-sm font-medium">Cliente</span>
-                    <span className="text-xs text-center opacity-70">Busco tatuarme</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedRole("artist")}
-                    className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
-                      selectedRole === "artist"
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border bg-secondary/30 text-muted-foreground hover:border-muted-foreground"
-                    }`}
-                  >
-                    <Palette className="h-6 w-6" />
-                    <span className="text-sm font-medium">Tatuador</span>
-                    <span className="text-xs text-center opacity-70">Soy artista</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedRole("supplier")}
-                    className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
-                      selectedRole === "supplier"
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border bg-secondary/30 text-muted-foreground hover:border-muted-foreground"
-                    }`}
-                  >
-                    <Store className="h-6 w-6" />
-                    <span className="text-sm font-medium">Proveedor</span>
-                    <span className="text-xs text-center opacity-70">Vendo insumos</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedRole("admin")}
-                    className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
-                      selectedRole === "admin"
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border bg-secondary/30 text-muted-foreground hover:border-muted-foreground"
-                    }`}
-                  >
-                    <ShieldCheck className="h-6 w-6" />
-                    <span className="text-sm font-medium">Admin</span>
-                    <span className="text-xs text-center opacity-70">Gestionar plataforma</span>
-                  </button>
-                </div>
-              </div>
-
               <div className="space-y-2">
                 <Label htmlFor="email">Correo electrónico</Label>
                 <Input
@@ -173,7 +92,6 @@ const Login = () => {
           </form>
         </Card>
       </div>
-      <AgeVerificationDialog open={showAgeDialog} onConfirm={handleAgeConfirm} />
     </div>
   );
 };
