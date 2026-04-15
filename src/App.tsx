@@ -79,6 +79,7 @@ const App = () => {
             <Route path="/convencion/:slug" element={<ConventionDetail />} />
             <Route path="/login" element={<Login />} />
             <Route path="/registro" element={<Register />} />
+            <Route path="/onboarding" element={<Onboarding />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
