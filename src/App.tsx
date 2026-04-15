@@ -17,6 +17,7 @@ import Login from "./pages/Login.tsx";
 import SupplierDashboard from "./pages/SupplierDashboard.tsx";
 import AdminDashboard from "./pages/AdminDashboard.tsx";
 import Register from "./pages/Register.tsx";
+import Onboarding from "./pages/Onboarding.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -78,6 +79,7 @@ const App = () => {
             <Route path="/convencion/:slug" element={<ConventionDetail />} />
             <Route path="/login" element={<Login />} />
             <Route path="/registro" element={<Register />} />
+            <Route path="/onboarding" element={<Onboarding />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

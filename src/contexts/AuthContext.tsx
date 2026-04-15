@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 export type UserRole = "client" | "artist" | "supplier" | "admin";
 
@@ -6,169 +8,146 @@ export interface UserProfile {
   id: string;
   email: string;
   name: string;
-  role: UserRole;
-  avatar?: string;
+  role: UserRole | null;
+  avatar_url?: string;
   bio?: string;
   phone?: string;
   city?: string;
-  createdAt: string;
-  isMinor?: boolean;
-  // Artist-specific fields
+  is_minor?: boolean;
   styles?: string[];
-  priceRange?: string;
+  price_range?: string;
   instagram?: string;
-  gallery?: string[];
-  flashDesigns?: string[];
-  // Supplier-specific fields
-  companyName?: string;
+  company_name?: string;
   description?: string;
-  products?: any[];
-  promotions?: any[];
-  sponsoredArtists?: string[];
 }
 
 interface AuthContextType {
   user: UserProfile | null;
+  authUser: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  quickLogin: (role?: UserRole) => void;
-  register: (data: { email: string; password: string; name: string; city?: string }) => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
-  updateProfile: (data: Partial<UserProfile>) => void;
+  register: (data: { email: string; password: string; name: string }) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
+  updateProfile: (data: Partial<UserProfile>) => Promise<void>;
+  setRole: (role: UserRole) => Promise<{ success: boolean; error?: string }>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const USERS_KEY = "tattsnearby_users";
-const SESSION_KEY = "tattsnearby_session";
-
-function getStoredUsers(): Array<{ profile: UserProfile; password: string }> {
-  try {
-    return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
-  } catch {
-    return [];
-  }
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [authUser, setAuthUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const sessionId = localStorage.getItem(SESSION_KEY);
-    if (sessionId) {
-      const users = getStoredUsers();
-      const found = users.find((u) => u.profile.id === sessionId);
-      if (found) setUser(found.profile);
+  const fetchProfile = async (userId: string, email?: string): Promise<UserProfile | null> => {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    const { data: roles } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId);
+
+    const role = roles && roles.length > 0 ? (roles[0].role as UserRole) : null;
+
+    if (profile) {
+      return {
+        id: profile.id,
+        email: profile.email || email || "",
+        name: profile.name,
+        role,
+        avatar_url: profile.avatar_url || undefined,
+        bio: profile.bio || undefined,
+        phone: profile.phone || undefined,
+        city: profile.city || undefined,
+        is_minor: profile.is_minor || undefined,
+        styles: profile.styles || undefined,
+        price_range: profile.price_range || undefined,
+        instagram: profile.instagram || undefined,
+        company_name: profile.company_name || undefined,
+        description: profile.description || undefined,
+      };
     }
-    setIsLoading(false);
+    return null;
+  };
+
+  const refreshProfile = async () => {
+    if (!authUser) return;
+    const profile = await fetchProfile(authUser.id, authUser.email);
+    if (profile) setUser(profile);
+  };
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        setAuthUser(session.user);
+        const profile = await fetchProfile(session.user.id, session.user.email);
+        setUser(profile);
+      } else {
+        setAuthUser(null);
+        setUser(null);
+      }
+      setIsLoading(false);
+    });
+
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        setAuthUser(session.user);
+        const profile = await fetchProfile(session.user.id, session.user.email);
+        setUser(profile);
+      }
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const login = async (email: string, password: string) => {
-    const users = getStoredUsers();
-    const found = users.find((u) => u.profile.email === email && u.password === password);
-    if (!found) return { success: false, error: "Correo o contraseña incorrectos" };
-    setUser(found.profile);
-    localStorage.setItem(SESSION_KEY, found.profile.id);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return { success: false, error: error.message };
     return { success: true };
   };
 
-  const quickLogin = (role: UserRole = "client") => {
-    const isArtist = role === "artist";
-    const isSupplier = role === "supplier";
-    const isAdmin = role === "admin";
-    const getId = () => {
-      if (isArtist) return "mock-artist-001";
-      if (isSupplier) return "mock-supplier-001";
-      if (isAdmin) return "mock-admin-001";
-      return "mock-user-001";
-    };
-    const getEmail = () => {
-      if (isArtist) return "artista@tattsnearby.com";
-      if (isSupplier) return "proveedor@tattsnearby.com";
-      if (isAdmin) return "admin@tattsnearby.com";
-      return "usuario@tattsnearby.com";
-    };
-    const getName = () => {
-      if (isArtist) return "Artista Demo";
-      if (isSupplier) return "Proveedor Demo";
-      if (isAdmin) return "Administrador";
-      return "Usuario Demo";
-    };
-    const mockProfile: UserProfile = {
-      id: getId(),
-      email: getEmail(),
-      name: getName(),
-      role,
-      city: "Ciudad de México",
-      createdAt: new Date().toISOString(),
-      ...(isArtist && {
-        styles: ["Realismo", "Blackwork", "Neotradicional"],
-        priceRange: "$1,500 - $5,000 MXN",
-        bio: "Tatuador profesional con 5 años de experiencia",
-        gallery: [],
-        flashDesigns: [],
-      }),
-      ...(isSupplier && {
-        companyName: "Proveedor Demo S.A.",
-        description: "Proveedor de insumos para tatuaje de alta calidad",
-        products: [],
-        promotions: [],
-        sponsoredArtists: [],
-      }),
-    };
-    setUser(mockProfile);
-    localStorage.setItem(SESSION_KEY, mockProfile.id);
-    const users = getStoredUsers();
-    if (!users.find((u) => u.profile.id === mockProfile.id)) {
-      users.push({ profile: mockProfile, password: "demo" });
-      localStorage.setItem(USERS_KEY, JSON.stringify(users));
-    } else {
-      const idx = users.findIndex((u) => u.profile.id === mockProfile.id);
-      users[idx].profile = mockProfile;
-      localStorage.setItem(USERS_KEY, JSON.stringify(users));
-    }
-  };
-
-  const register = async (data: { email: string; password: string; name: string; city?: string }) => {
-    const users = getStoredUsers();
-    if (users.find((u) => u.profile.email === data.email)) {
-      return { success: false, error: "Este correo ya está registrado" };
-    }
-    const profile: UserProfile = {
-      id: crypto.randomUUID(),
+  const register = async (data: { email: string; password: string; name: string }) => {
+    const { error } = await supabase.auth.signUp({
       email: data.email,
-      name: data.name,
-      role: "client",
-      city: data.city,
-      createdAt: new Date().toISOString(),
-    };
-    users.push({ profile, password: data.password });
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-    localStorage.setItem(SESSION_KEY, profile.id);
-    setUser(profile);
+      password: data.password,
+      options: {
+        data: { name: data.name },
+        emailRedirectTo: window.location.origin,
+      },
+    });
+    if (error) return { success: false, error: error.message };
     return { success: true };
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem(SESSION_KEY);
+    setAuthUser(null);
   };
 
-  const updateProfile = (data: Partial<UserProfile>) => {
-    if (!user) return;
-    const updated = { ...user, ...data };
-    setUser(updated);
-    const users = getStoredUsers();
-    const idx = users.findIndex((u) => u.profile.id === user.id);
-    if (idx !== -1) {
-      users[idx].profile = updated;
-      localStorage.setItem(USERS_KEY, JSON.stringify(users));
-    }
+  const updateProfile = async (data: Partial<UserProfile>) => {
+    if (!authUser) return;
+    const { role, email, id, ...profileData } = data as any;
+    await supabase.from("profiles").update(profileData).eq("id", authUser.id);
+    await refreshProfile();
+  };
+
+  const setRole = async (role: UserRole) => {
+    if (!authUser) return { success: false, error: "No autenticado" };
+    const { error } = await supabase.from("user_roles").insert({ user_id: authUser.id, role });
+    if (error) return { success: false, error: error.message };
+    await refreshProfile();
+    return { success: true };
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, quickLogin, register, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user, authUser, isLoading, login, register, logout, updateProfile, setRole, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );

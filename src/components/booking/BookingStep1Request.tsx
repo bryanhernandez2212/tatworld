@@ -19,7 +19,7 @@ interface Props {
 
 const BookingStep1Request = ({ data, updateData, artist, onNext }: Props) => {
   const { user } = useAuth();
-  const isMinor = user?.isMinor === true;
+  const isMinor = user?.is_minor === true;
   const [guardianName, setGuardianName] = useState("");
   const [guardianIdPhoto, setGuardianIdPhoto] = useState<File | null>(null);
   const [previews, setPreviews] = useState<string[]>([]);

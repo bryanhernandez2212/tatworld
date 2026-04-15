@@ -12,7 +12,6 @@ import Navbar from "@/components/Navbar";
 const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [city, setCity] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -32,11 +31,11 @@ const Register = () => {
       return;
     }
     setLoading(true);
-    const result = await register({ email, password, name, city: city || undefined });
+    const result = await register({ email, password, name });
     setLoading(false);
     if (result.success) {
-      toast({ title: "¡Cuenta creada!", description: "Bienvenido a TattsNearby." });
-      navigate("/");
+      toast({ title: "¡Cuenta creada!", description: "Ahora selecciona tu tipo de cuenta." });
+      navigate("/onboarding");
     } else {
       toast({ title: "Error", description: result.error, variant: "destructive" });
     }
@@ -58,33 +57,11 @@ const Register = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Nombre completo</Label>
-                <Input
-                  id="name"
-                  placeholder="Tu nombre"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
+                <Input id="name" placeholder="Tu nombre" value={name} onChange={(e) => setName(e.target.value)} required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Correo electrónico</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="tu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="city">Ciudad (opcional)</Label>
-                <Input
-                  id="city"
-                  placeholder="Ej: Ciudad de México"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                />
+                <Input id="email" type="email" placeholder="tu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Contraseña</Label>
